@@ -64,8 +64,8 @@ def OWA_LP(n, p, utilities, weights, one_one=False):
 
         # Constraints that associate z_i and y_i variables
         b = m.addMVar(shape=(n,n), vtype=GRB.BINARY, name="b")
-        m.addConstrs((y <= z[k] + M * b[:,k] for k in range(n)), name="c_yz")
-        m.addConstrs((b[:,k] @ np.ones(n) == k for k in range(n)), name="c_b")
+        m.addConstrs((y[k] * np.ones(n) <= z + M * b[k,:] for k in range(n)), name="c_yz")
+        m.addConstrs((b[k,:] @ np.ones(n) == k for k in range(n)), name="c_b")
 
         m.write("owa.lp")
 
