@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 # -------- UTILS -------- #
 
@@ -19,11 +20,21 @@ def parse_OWA_problem(filepath):
 			utilities.append(read_ints(file))
 
 		utilities = np.array(utilities)
-		print(utilities)
 
 	return nb_agents, nb_items, utilities
 
-def OWA_weights_generator(alpha, n):
+def generate_OWA_problem(nb_agents, nb_items):
+	"""
+	Generates utilities for a problem to be resolved with OWA.
+	"""
+
+	return np.random.randint(30, size=(nb_agents, nb_items))
+
+def OWA_weights_generator(n, alpha=None):
+
+	# Random generation of weights
+	if alpha == None:
+		alpha = random.randint(1, 10)
 
 	if alpha < 1:
 		print("Error: alpha must be greater than or equals to 1.") 
