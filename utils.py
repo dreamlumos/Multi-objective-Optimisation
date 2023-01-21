@@ -21,7 +21,7 @@ def parse_OWA_problem(filepath):
 		utilities = np.array(utilities)
 		print(utilities)
 
-	return nb_items, nb_agents, utilities
+	return nb_agents, nb_items, utilities
 
 def OWA_weights_generator(alpha, n):
 

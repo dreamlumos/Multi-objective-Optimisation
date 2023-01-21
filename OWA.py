@@ -5,15 +5,15 @@ from gurobipy import GRB
 
 # -------- OWA LP -------- #
 
-def OWA_LP(p, n, utilities, weights):
+def OWA_LP(n, p, utilities, weights):
 	"""
-	:param p: nb_items
 	:param n: nb_agents
+	:param p: nb_items
 	:param utilities: U
 	:param weights: [w_1, w_2, ..., w_n] in order of increasing ordered components (decreasing weights)
 
-	:type nb_items: int
 	:type nb_agents: int
+	:type nb_items: int
 	:type utilities: ndarray[int]
 	:type weights: ndarray[int]
 
