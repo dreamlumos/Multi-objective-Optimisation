@@ -40,7 +40,7 @@ def solve_OWA_problem(filepath=None, nb_agents=None, alpha=None, one_to_one=True
         plt.bar(["Component "+str(i) for i in range(nb_agents)], lorenz_vector(solution))
         plt.show()
 
-def question_1_1(plot_figures=False):
+def question_1_1(alpha_min=1, alpha_max=10, plot_figures=False):
     """
     Analysis of solutions for the given example depending on the value of alpha.
     """
@@ -56,17 +56,20 @@ def question_1_1(plot_figures=False):
     fig1, ax1 = plt.subplots(figsize=(6.6, 4))
     fig2, ax2 = plt.subplots(figsize=(6.6, 4))
     cmap = mpl.cm.get_cmap('Blues')
-    norm = mpl.colors.Normalize(vmin=1, vmax=10)
+    norm = mpl.colors.Normalize(vmin=alpha_min, vmax=alpha_max)
     colours = [cmap(i) for i in np.linspace(0.1, 1, num=11)]
 
     runtimes = []
+    alpha_list = range(alpha_min, alpha_max+1, (alpha_max+1-alpha_min)//10)
+    print(alpha_list)
     # Experiments
-    for alpha in range(1, 11):
+    for exp in range(len(alpha_list)):
+        alpha = alpha_list[exp]
         weights = OWA_weights_generator(nb_agents, alpha)
         solution, runtime = OWA_LP(nb_agents, nb_items, utilities, weights, one_to_one=True)
         runtimes.append(runtime)
-        ax1.bar([i + width + alpha * (1/12) for i in range(nb_agents)], solution, width=width, color=colours[alpha], label="alpha = "+str(alpha))
-        ax2.bar([i + width + alpha * (1/12) for i in range(nb_agents)], lorenz_vector(solution), width=width, color=colours[alpha], label="alpha = "+str(alpha))
+        ax1.bar([i + width + exp * (1/12) for i in range(nb_agents)], solution, width=width, color=colours[exp], label="alpha = "+str(alpha))
+        ax2.bar([i + width + exp * (1/12) for i in range(nb_agents)], lorenz_vector(solution), width=width, color=colours[exp], label="alpha = "+str(alpha))
 
     print("____________________________")
     print("Utilities:", utilities)
@@ -88,7 +91,7 @@ def question_1_1(plot_figures=False):
         plt.savefig("question_1_1_Lorenz.png")
 
         plt.figure(3)
-        plt.plot([i for i in range(1, 11)], runtimes)
+        plt.plot(alpha_list, runtimes)
         plt.savefig("question_1_1_runtimes.png")
         plt.show()
 
@@ -128,6 +131,6 @@ if __name__ == "__main__":
 
     #solve_OWA_problem("owa_example.txt", alpha=1, verbose=True)
     #solve_OWA_problem()
-    #question_1_1()
+    question_1_1(alpha_max=40, plot_figures=True)
     #question_1_2([i for i in range(3, 15)])
     #question_1_3()
