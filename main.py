@@ -119,6 +119,63 @@ def question_1_2(nb_agents_list=[5, 10, 15]):
     plt.savefig("question_1_2_"+datetime.datetime.now().strftime("%Y%m%d_%H%M%S")+".png")
     plt.show()
 
+def question_1_3(alpha_list=[2, 5]):
+    """
+    Analysis of the evolution of solutions when the p vector is varied for the values of alpha provided.
+    """
+
+    filepath = "owa_example.txt"
+    nb_agents, nb_items, utilities = parse_OWA_problem(filepath)
+
+    p_list = []
+    equality_component = 1 / nb_agents
+    for extremum_i in range(nb_agents): # for each extremum
+        for step in range(1, nb_agents): # nb of steps
+            for component_i in range(nb_agents): # for each component of the vector
+                new_p = [0] * nb_agents
+                if component_i == extremum_i:
+                    new_p[component_i] = step * equality_component
+                else:
+                    new_p[component_i] = (1 - (step * equality_component)) / (nb_agents - 1)
+                p_list.append(new_p)
+
+    for alpha in alpha_list:
+        for p in p_list:
+            # TODO: WOWA LP
+            print("TODO: WOWA LP")
+
+def question_1_4(nb_agents_list=[5, 10, 15]):
+    """
+    Analysis of execution time for WOWA problems of various sizes.
+    """
+
+    avg_times = [] # average execution time for each pair (n,p)
+    for nb_agents in nb_agents_list:
+        nb_items = 5 * nb_agents
+        times = []
+        for i in range(10):
+            utilities = generate_OWA_problem(nb_agents, nb_items)
+            # TODO: p generator
+            # TODO: WOWA LP
+            # times.append(runtime)
+        # avg_times.append(np.mean(times))
+
+    # np.savetxt("question_1_4_"+datetime.datetime.now().strftime("%Y%m%d_%H%M%S")+".csv", avg_times)
+    # plt.title("Average execution times for WOWA problems of various sizes")
+    # plt.xlabel("Size in number of agents n (with nb_items = 5*n)")
+    # plt.ylabel("Gurobi Runtime (seconds)")
+    # plt.plot(nb_agents_list, avg_times)
+    # plt.savefig("question_1_4_"+datetime.datetime.now().strftime("%Y%m%d_%H%M%S")+".png")
+    # plt.show()
+
+def question_2_2():
+    """
+    Analysis of some solutions found for the given Choquet example using the Choquet integral.
+    """
+
+    max_mean_solution, _ = OWA_LP(nb_criteria, nb_choices, utilities, [1/nb_choices]*nb_choices)
+
+
 
 # -------- Main -------- #
 
