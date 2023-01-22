@@ -5,19 +5,19 @@ from gurobipy import GRB
 
 # -------- OWA LP -------- #
 
-def OWA_LP(n, p, utilities, weights, one_one=False):
+def OWA_LP(n, p, utilities, weights, one_to_one=True):
     """
     :param n: nb_agents
     :param p: nb_items
     :param utilities: U
     :param weights: [w_1, w_2, ..., w_n] in order of increasing ordered components (decreasing weights)
-    :param one_one: indicates whether only one item is to be attributed per agent
+    :param one_to_one: indicates whether only one item is to be attributed per agent
 
     :type nb_agents: int
     :type nb_items: int
     :type utilities: ndarray[int]
     :type weights: ndarray[int]
-    :type one_one: bool
+    :type one_to_one: bool
 
     :return solution: x
     :rtype: ndarray[int]
@@ -48,7 +48,7 @@ def OWA_LP(n, p, utilities, weights, one_one=False):
         nb_attributions_per_item = np.ones(p)
         m.addConstrs((sum(x[:,j]) <= nb_attributions_per_item[j] for j in range(p)), name="c_nbattitems")
 
-        if one_one:
+        if one_to_one:
             # We ensure that each agent receives only one item
             nb_attributions_per_agent = np.ones(n)
             m.addConstrs((sum(x[i]) <= nb_attributions_per_agent[i] for i in range(n)), name="c_nbattagents")
@@ -84,4 +84,4 @@ def OWA_LP(n, p, utilities, weights, one_one=False):
     except AttributeError:
         print('Encountered an attribute error')
 
-    return x, m.Runtime
+    return z.X, m.Runtime
