@@ -6,20 +6,18 @@ from gurobipy import GRB, quicksum
 
 # -------- Choquet LP -------- #
 
-def choquet_lp(n, p, utilities, couts, v, ne_one=False):
+def choquet_lp(n, p, utilities, costs, v):
     """
-    :param n: nombre d'objectifs
-    :param p: nombre de projets
+    :param n: number of objectives
+    :param p: number of projects
     :param utilities: U
-    :param couts: liste des couts des projets : [c1, ..., ck] avec k allant de 1 à p
+    :param costs: costs for each project: [c1, ..., ck] with k in {1, ..., p}
     :param v: capacité (fonction de croyance)
-    :param one_one: indicates whether only one item is to be attributed per agent
 
     :type n: int
     :type p: int
     :type utilities: ndarray[int]
-    :type couts: ndarray[int]
-    :type one_one: bool
+    :type costs: ndarray[int]
 
     :return solution: x
     :rtype: ndarray[int]
@@ -35,14 +33,14 @@ def choquet_lp(n, p, utilities, couts, v, ne_one=False):
         for i in range(len(list_projet) + 1):
             combinations.extend(list(itertools.combinations(list_projet, i)))
 
-        # Create binary variables x_1, ... x_p
+        # Create binary variables x_1, ..., x_p
         x = m.addVars(p, vtype=GRB.BINARY, name="x")
 
         # ----- Contraintes -----
 
         # le coût total des projets sélectionnés ne dépasse pas l'enveloppe budgétaire fixée
-        b = sum(couts)/2  # l'enveloppe budgétaire
-        m.addConstr(quicksum(couts[i]*x[i] for i in range(p)) <= b, name="budget")
+        b = sum(costs)/2  # l'enveloppe budgétaire
+        m.addConstr(quicksum(costs[i]*x[i] for i in range(p)) <= b, name="budget")
 
         # z[i][x] : aptitude d'un ensemble de projets x à satisfaire l'objectif i
         # est définie comme la somme des utilités uij des projets j sélectionnés
@@ -63,6 +61,8 @@ def choquet_lp(n, p, utilities, couts, v, ne_one=False):
 
         # Set objective
         # m.setObjective(quicksum(v[i]*z[i] for i in range(n)), GRB.MAXIMIZE)
+
+
 
         m.write("choquet.lp")
 
