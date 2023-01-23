@@ -189,9 +189,9 @@ def question_2_2():
     
     # max_mean_solution, _ = OWA_LP(nb_criteria, nb_choices, utilities, [1 / nb_choices] * nb_choices)
 
-    solutions, temps = choquet_lp(nb_objectifs, nb_projets, costs, utilities)
+    solutions, temps = choquet_lp(nb_objectives, nb_projects, costs[0], utilities)
 
-    print(solutions)
+    print("Execution time: ", temps)
 
 # -------- Main -------- #
 
