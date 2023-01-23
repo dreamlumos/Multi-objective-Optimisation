@@ -1,6 +1,7 @@
 import datetime
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from statistics import mean
 import random
 import numpy as np
 
@@ -178,7 +179,7 @@ def question_1_4(nb_agents_list=[5, 10, 15]):
     # plt.show()
 
 
-def question_2_2():
+def question_2_2(t):
     """
     Analysis of some solutions found for the given Choquet example using the Choquet integral.
     """
@@ -188,9 +189,58 @@ def question_2_2():
 
     # max_mean_solution, _ = OWA_LP(nb_criteria, nb_choices, utilities, [1 / nb_choices] * nb_choices)
 
-    solutions, temps = choquet_lp(nb_objectives, nb_projects, costs[0], utilities)
+    all_solutions = []
+    all_times = []
+    for i in range(t):
+        solution, time = choquet_lp(nb_objectives, nb_projects, costs[0], utilities)
+        all_solutions.append(solution)
+        all_times.append(time)
 
-    print("Execution time: ", temps)
+    original_list = [tuple(lst) for lst in all_solutions]
+    unique_list = list(set(original_list))
+    unique_list = [list(tpl) for tpl in unique_list]
+
+    print("Solutions: ", unique_list)
+    print("Mean execution time: ", mean(all_times))
+
+
+def question_2_3():
+    list_n = [2, 5, 10]  # liste des nombres d'objectifs
+    list_p = [5, 10, 10, 20]  # liste des nombres de projets
+    num_matrices = 10  # nombre de matrices à générer aléatoirement
+    dict_mean_time = {}  # dictionnaire du temps moyen d'exécution pour un couple (n,p)
+
+    f = open("question_2_3.txt", "w")
+
+    for n in list_n:
+        for p in list_p:
+            list_times = []  # liste du temps d'exécution des matrices U
+
+            for i in range(num_matrices):
+                # matrice U de taille (n, p) avec des coefficients aléatoire entre 1 et 20
+                utilities = np.random.randint(1, 21, size=(n, p))
+
+                # liste de taille p des couts des projets tirés aléatoirement entre 10 et 100
+                costs = np.random.randint(10, 101, size=p)
+
+                # optimisation de l'intégrale de choquet
+                solution, time = choquet_lp(n, p, costs, utilities)
+
+                # ajout du temps d'exécution dans la liste
+                list_times.append(time)
+
+            # ajout de la moyenne du temps d'exécution pour le couple (n, p)
+            dict_mean_time[(n, p)] = mean(list_times)
+
+            # enregistrer la valeur dans un fichier
+            f.write(str(n) + "," + str(p) + "," + str(dict_mean_time[(n, p)]))
+
+    # affichage des temps moyens d'exécution pour les couples (n, p)
+    for n in list_n:
+        for p in list_p:
+            print(f"({n}, {p}) : {dict_mean_time[(n, p)]}")
+
+    f.close()
 
 
 # -------- Main -------- #
@@ -208,4 +258,5 @@ if __name__ == "__main__":
     # question_1_2(one_to_one=False)
     # question_1_3()
 
-    question_2_2()
+    # question_2_2(10)
+    question_2_3()
