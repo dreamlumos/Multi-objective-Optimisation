@@ -33,12 +33,12 @@ def choquet_lp(n, p, costs, utilities):
         for i in range(len(liste_projets) + 1):
             combinaisons.extend(list(itertools.combinations(liste_projets, i)))
 
-        # s_i variable binaire pour si le projet i est sélectionné ou pas
-        s = m.addMVar(shape=p, vtype=GRB.BINARY, name="x")
+        # variable binaire pour savoir quel projet est sélectionné
+        selection = m.addMVar(shape=p, vtype=GRB.BINARY, name="x")
 
         # le coût total des projets sélectionnés ne dépasse pas l'enveloppe budgétaire fixée
         b = sum(costs) / 2  # l'enveloppe budgétaire
-        m.addConstr(quicksum(costs[i] * s[i] for i in range(p)) <= b, name="budget")
+        m.addConstr(quicksum(costs[i] * selection[i] for i in range(p)) <= b, name="budget")
 
         # z[i][x] : aptitude d'un ensemble de projets x à satisfaire l'objectif i
         # est définie comme la somme des utilités uij des projets j sélectionnés
@@ -51,7 +51,7 @@ def choquet_lp(n, p, costs, utilities):
                 else:
                     somme = 0
                     for j in x:
-                        somme += utilities[i][j] * s[j]
+                        somme += utilities[i][j] * selection[j]
                     z[i].append(somme)
         z = np.array(z)
 
@@ -60,16 +60,7 @@ def choquet_lp(n, p, costs, utilities):
             m.addConstr(quicksum(z[i][j] for i in range(n)) >= y[j], name="aptitude_"+str(x))
 
         # calculer les masses de mobius
-        mobius = []
-        for x in combinaisons:
-            if len(x) == 0:
-                mobius.append(0)
-            elif len(x) == p:
-                mobius.append(1)
-            else:
-                epsilon = 1e-9  # pour éviter d'avoir 0 ou 1
-                mobius.append(random.uniform(0 + epsilon, 1 - epsilon))
-        mobius = np.array(mobius)
+        mobius = np.random.dirichlet([1 for j in range(len(combinaisons))])
 
         # Set objective
         # m.setObjective(quicksum(v[i]*z[i] for i in range(n)), GRB.MAXIMIZE)
@@ -79,10 +70,15 @@ def choquet_lp(n, p, costs, utilities):
         # Optimize model
         m.optimize()
 
+        # Récupérer les solutions
+        max_value = max(y.X)
+        indices = [i for i, x in enumerate(y.X) if x == max_value]
+        solutions = [combinaisons[i] for i in indices]
+
         print("Y: ", y.X)
-        print("Z: ", z.X)
-        print("S: ", s.X)
-        print('Obj: %g' % m.objVal)
+        print("Solutions: ", solutions)
+        print("Selection: ", selection.X)
+        # print('Obj: %g' % m.objVal)
 
     except gp.GurobiError as e:
         print('Error code ' + str(e.errno) + ": " + str(e))
@@ -90,4 +86,4 @@ def choquet_lp(n, p, costs, utilities):
     except AttributeError:
         print('Encountered an attribute error')
 
-    return y, m.Runtime
+    return solutions, m.Runtime
