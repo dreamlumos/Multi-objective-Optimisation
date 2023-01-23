@@ -34,30 +34,30 @@ def choquet_lp(n, p, costs, utilities):
             combinaisons.extend(list(itertools.combinations(liste_projets, i)))
 
         # variable binaire pour savoir quel projet est sélectionné
-        selection = m.addMVar(shape=p, vtype=GRB.BINARY, name="x")
+        x = m.addMVar(shape=p, vtype=GRB.BINARY, name="x")
 
         # le coût total des projets sélectionnés ne dépasse pas l'enveloppe budgétaire fixée
         b = sum(costs) / 2  # l'enveloppe budgétaire
-        m.addConstr(quicksum(costs[i] * selection[i] for i in range(p)) <= b, name="budget")
+        m.addConstr(quicksum(costs[i] * x[i] for i in range(p)) <= b, name="budget")
 
         # z[i][x] : aptitude d'un ensemble de projets x à satisfaire l'objectif i
         # est définie comme la somme des utilités uij des projets j sélectionnés
         z = []
         for i in range(n):
             z.append([])
-            for x in combinaisons:
-                if len(x) == 0:
+            for ss in combinaisons:
+                if len(ss) == 0:
                     z[i].append(0)
                 else:
                     somme = 0
-                    for j in x:
-                        somme += utilities[i][j] * selection[j]
+                    for j in ss:
+                        somme += utilities[i][j] * x[j]
                     z[i].append(somme)
         z = np.array(z)
 
         y = m.addMVar(shape=len(combinaisons), vtype=GRB.CONTINUOUS, name="y")
-        for j, x in enumerate(combinaisons):
-            m.addConstr(quicksum(z[i][j] for i in range(n)) >= y[j], name="aptitude_"+str(x))
+        for j, ss in enumerate(combinaisons):
+            m.addConstr(quicksum(z[i][j] for i in range(n)) >= y[j], name="aptitude_"+str(ss))
 
         # calculer les masses de mobius
         mobius = np.random.dirichlet([1 for j in range(len(combinaisons))])
@@ -77,7 +77,7 @@ def choquet_lp(n, p, costs, utilities):
 
         print("Y: ", y.X)
         print("Solutions: ", solutions)
-        print("Selection: ", selection.X)
+        print("X: ", x.X)
         # print('Obj: %g' % m.objVal)
 
     except gp.GurobiError as e:
