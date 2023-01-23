@@ -33,12 +33,12 @@ def choquet_lp(n, p, costs, utilities):
         for i in range(len(liste_projets) + 1):
             combinaisons.extend(list(itertools.combinations(liste_projets, i)))
 
-        # Create binary variables b_1, ..., b_p
-        b = m.addMVar(shape=p, vtype=GRB.BINARY, name="x")
+        # s_i variable binaire pour si le projet i est sélectionné ou pas
+        s = m.addMVar(shape=p, vtype=GRB.BINARY, name="x")
 
         # le coût total des projets sélectionnés ne dépasse pas l'enveloppe budgétaire fixée
         b = sum(costs) / 2  # l'enveloppe budgétaire
-        m.addConstrs(quicksum(costs[i] * b[i] for i in range(p)) <= b, name="budget")
+        m.addConstrs(quicksum(costs[i] * s[i] for i in range(p)) <= b, name="budget")
 
         # z[i][x] : aptitude d'un ensemble de projets x à satisfaire l'objectif i
         # est définie comme la somme des utilités uij des projets j sélectionnés
@@ -51,7 +51,7 @@ def choquet_lp(n, p, costs, utilities):
                 else:
                     somme = 0
                     for j in x:
-                        somme += utilities[i][j] * b[j]
+                        somme += utilities[i][j] * s[j]
                     z[i].append(somme)
         z = np.array(z)
 
@@ -82,7 +82,7 @@ def choquet_lp(n, p, costs, utilities):
 
         print("Y: ", y.X)
         print("Z: ", z.X)
-        print("B: ", b.X)
+        print("S: ", s.X)
         print('Obj: %g' % m.objVal)
 
     except gp.GurobiError as e:
