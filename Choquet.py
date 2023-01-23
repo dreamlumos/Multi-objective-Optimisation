@@ -1,23 +1,23 @@
 import numpy as np
 import itertools
+import random
 import gurobipy as gp
 from gurobipy import GRB, quicksum
 
 
 # -------- Choquet LP -------- #
 
-def choquet_lp(n, p, utilities, costs, v):
+def choquet_lp(n, p, costs, utilities):
     """
     :param n: number of objectives
     :param p: number of projects
-    :param utilities: U
     :param costs: costs for each project: [c1, ..., ck] with k in {1, ..., p}
-    :param v: capacité (fonction de croyance)
+    :param utilities: U
 
     :type n: int
     :type p: int
-    :type utilities: ndarray[int]
     :type costs: ndarray[int]
+    :type utilities: ndarray[int]
 
     :return solution: x
     :rtype: ndarray[int]
@@ -27,51 +27,61 @@ def choquet_lp(n, p, utilities, costs, v):
         # Create a new model
         m = gp.Model("Choquet")
 
-        list_projet = [i for i in range(p)]
+        # Avoir toutes les combinaisons de projets possibles
+        liste_projets = [i for i in range(p)]
+        combinaisons = []
+        for i in range(len(liste_projets) + 1):
+            combinaisons.extend(list(itertools.combinations(liste_projets, i)))
 
-        combinations = []
-        for i in range(len(list_projet) + 1):
-            combinations.extend(list(itertools.combinations(list_projet, i)))
-
-        # Create binary variables x_1, ..., x_p
-        x = m.addVars(p, vtype=GRB.BINARY, name="x")
-
-        # ----- Contraintes -----
+        # s_i variable binaire pour si le projet i est sélectionné ou pas
+        s = m.addMVar(shape=p, vtype=GRB.BINARY, name="x")
 
         # le coût total des projets sélectionnés ne dépasse pas l'enveloppe budgétaire fixée
-        b = sum(costs)/2  # l'enveloppe budgétaire
-        m.addConstr(quicksum(costs[i]*x[i] for i in range(p)) <= b, name="budget")
+        b = sum(costs) / 2  # l'enveloppe budgétaire
+        m.addConstr(quicksum(costs[i] * s[i] for i in range(p)) <= b, name="budget")
 
         # z[i][x] : aptitude d'un ensemble de projets x à satisfaire l'objectif i
         # est définie comme la somme des utilités uij des projets j sélectionnés
-        z = {}
-
+        z = []
         for i in range(n):
-            z[i] = {}
-
-        for k, ens_proj in enumerate(combinations):
-            for i in range(n):
-                if ens_proj:
-                    somme = 0
-                    for j in ens_proj:
-                        somme += utilities[i][j] * x[j]
-                    z[i][ens_proj] = somme
+            z.append([])
+            for x in combinaisons:
+                if len(x) == 0:
+                    z[i].append(0)
                 else:
-                    z[i][ens_proj] = 0
+                    somme = 0
+                    for j in x:
+                        somme += utilities[i][j] * s[j]
+                    z[i].append(somme)
+        z = np.array(z)
+
+        y = m.addMVar(shape=len(combinaisons), vtype=GRB.CONTINUOUS, name="y")
+        for j, x in enumerate(combinaisons):
+            m.addConstr(quicksum(z[i][j] for i in range(n)) >= y[j], name="aptitude_"+str(x))
+
+        # calculer les masses de mobius
+        mobius = []
+        for x in combinaisons:
+            if len(x) == 0:
+                mobius.append(0)
+            elif len(x) == p:
+                mobius.append(1)
+            else:
+                epsilon = 1e-9  # pour éviter d'avoir 0 ou 1
+                mobius.append(random.uniform(0 + epsilon, 1 - epsilon))
+        mobius = np.array(mobius)
 
         # Set objective
         # m.setObjective(quicksum(v[i]*z[i] for i in range(n)), GRB.MAXIMIZE)
-
-
 
         m.write("choquet.lp")
 
         # Optimize model
         m.optimize()
 
-        print("X: ", x.X)
+        print("Y: ", y.X)
         print("Z: ", z.X)
-        print("B: ", b.X)
+        print("S: ", s.X)
         print('Obj: %g' % m.objVal)
 
     except gp.GurobiError as e:
@@ -80,4 +90,4 @@ def choquet_lp(n, p, utilities, costs, v):
     except AttributeError:
         print('Encountered an attribute error')
 
-    return x, m.Runtime
+    return y, m.Runtime

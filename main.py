@@ -2,9 +2,12 @@ import datetime
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import random
+import numpy as np
 
 from OWA import *
+from Choquet import *
 from utils import *
+
 
 def solve_OWA_problem(filepath=None, nb_agents=None, alpha=None, one_to_one=True, verbose=False):
     """
@@ -23,7 +26,7 @@ def solve_OWA_problem(filepath=None, nb_agents=None, alpha=None, one_to_one=True
             nb_items = nb_agents
         utilities = generate_OWA_problem(nb_agents, nb_items)
         print(utilities)
-    #weights = np.array([1/5, 1/5, 1/5, 1/5, 1/5])
+    # weights = np.array([1/5, 1/5, 1/5, 1/5, 1/5])
     weights = OWA_weights_generator(nb_agents, alpha)
     solution, runtime = OWA_LP(nb_agents, nb_items, utilities, weights, one_to_one)
 
@@ -33,12 +36,13 @@ def solve_OWA_problem(filepath=None, nb_agents=None, alpha=None, one_to_one=True
         print("Solution:", solution)
 
         plt.title("Satisfaction of each agent")
-        plt.bar(["Agent "+str(i) for i in range(nb_agents)], solution)
+        plt.bar(["Agent " + str(i) for i in range(nb_agents)], solution)
         plt.show()
 
         plt.title("Lorenz vector of the OWA solution")
-        plt.bar(["Component "+str(i) for i in range(nb_agents)], lorenz_vector(solution))
+        plt.bar(["Component " + str(i) for i in range(nb_agents)], lorenz_vector(solution))
         plt.show()
+
 
 def question_1_1(alpha_min=1, alpha_max=10, plot_figures=False):
     """
@@ -46,12 +50,12 @@ def question_1_1(alpha_min=1, alpha_max=10, plot_figures=False):
     """
 
     print("Question 1.1 : Analysis of solutions for the given example depending on the value of alpha.")
-    
+
     filepath = "owa_example.txt"
     nb_agents, nb_items, utilities = parse_OWA_problem(filepath)
 
     # Bar chart configurations
-    width = 1/14
+    width = 1 / 14
     x = [i + 0.5 for i in range(nb_agents)]
     fig1, ax1 = plt.subplots(figsize=(6.6, 4))
     fig2, ax2 = plt.subplots(figsize=(6.6, 4))
@@ -60,7 +64,7 @@ def question_1_1(alpha_min=1, alpha_max=10, plot_figures=False):
     colours = [cmap(i) for i in np.linspace(0.1, 1, num=11)]
 
     runtimes = []
-    alpha_list = range(alpha_min, alpha_max+1, (alpha_max+1-alpha_min)//10)
+    alpha_list = range(alpha_min, alpha_max + 1, (alpha_max + 1 - alpha_min) // 10)
     print(alpha_list)
     # Experiments
     for exp in range(len(alpha_list)):
@@ -68,8 +72,10 @@ def question_1_1(alpha_min=1, alpha_max=10, plot_figures=False):
         weights = OWA_weights_generator(nb_agents, alpha)
         solution, runtime = OWA_LP(nb_agents, nb_items, utilities, weights, one_to_one=True)
         runtimes.append(runtime)
-        ax1.bar([i + width + exp * (1/12) for i in range(nb_agents)], solution, width=width, color=colours[exp], label="alpha = "+str(alpha))
-        ax2.bar([i + width + exp * (1/12) for i in range(nb_agents)], lorenz_vector(solution), width=width, color=colours[exp], label="alpha = "+str(alpha))
+        ax1.bar([i + width + exp * (1 / 12) for i in range(nb_agents)], solution, width=width, color=colours[exp],
+                label="alpha = " + str(alpha))
+        ax2.bar([i + width + exp * (1 / 12) for i in range(nb_agents)], lorenz_vector(solution), width=width,
+                color=colours[exp], label="alpha = " + str(alpha))
 
     print("____________________________")
     print("Utilities:", utilities)
@@ -79,15 +85,16 @@ def question_1_1(alpha_min=1, alpha_max=10, plot_figures=False):
         plt.figure(1)
         ax1.title.set_text("Satisfaction of each agent")
         ax1.set_xticks(x)
-        ax1.set_xticklabels(["Agent "+str(i) for i in range(1, nb_agents+1)])
+        ax1.set_xticklabels(["Agent " + str(i) for i in range(1, nb_agents + 1)])
         ax1.set_yticks(range(0, 21, 2))
+
         fig1.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=[ax1], label='alpha')
         plt.savefig("question_1_1_solution.png")
 
         plt.figure(2)
         ax2.title.set_text("Lorenz components of the OWA solutions")
         ax2.set_xticks(x)
-        ax2.set_xticklabels(["L"+str(i) for i in range(nb_agents)])
+        ax2.set_xticklabels(["L" + str(i) for i in range(nb_agents)])
         fig2.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=[ax2], label='alpha')
         plt.savefig("question_1_1_Lorenz.png")
 
@@ -96,12 +103,12 @@ def question_1_1(alpha_min=1, alpha_max=10, plot_figures=False):
         plt.savefig("question_1_1_runtimes.png")
         plt.show()
 
-def question_1_2(nb_agents_list=[5, 10, 15], one_to_one=True):
+
     """
     Analysis of execution time for OWA problems of various sizes.
     """
 
-    avg_times = [] # average execution time for each pair (n,p)
+    avg_times = []  # average execution time for each pair (n,p)
     for nb_agents in nb_agents_list:
         nb_items = 5 * nb_agents
         times = []
@@ -112,13 +119,14 @@ def question_1_2(nb_agents_list=[5, 10, 15], one_to_one=True):
             times.append(runtime)
         avg_times.append(np.mean(times))
 
-    np.savetxt("question_1_2_"+datetime.datetime.now().strftime("%Y%m%d_%H%M%S")+".csv", avg_times)
+    np.savetxt("question_1_2_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".csv", avg_times)
     plt.title("Average execution times for OWA problems of various sizes")
     plt.xlabel("Size in number of agents n (with nb_items = 5*n)")
     plt.ylabel("Average Gurobi Runtime for 10 instances (seconds)")
     plt.plot(nb_agents_list, avg_times)
-    plt.savefig("question_1_2_"+datetime.datetime.now().strftime("%Y%m%d_%H%M%S")+".png")
+    plt.savefig("question_1_2_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".png")
     plt.show()
+
 
 def question_1_3(alpha_list=[2, 5]):
     """
@@ -130,9 +138,9 @@ def question_1_3(alpha_list=[2, 5]):
 
     p_list = []
     equality_component = 1 / nb_agents
-    for extremum_i in range(nb_agents): # for each extremum
-        for step in range(1, nb_agents): # nb of steps
-            for component_i in range(nb_agents): # for each component of the vector
+    for extremum_i in range(nb_agents):  # for each extremum
+        for step in range(1, nb_agents):  # nb of steps
+            for component_i in range(nb_agents):  # for each component of the vector
                 new_p = [0] * nb_agents
                 if component_i == extremum_i:
                     new_p[component_i] = step * equality_component
@@ -145,12 +153,13 @@ def question_1_3(alpha_list=[2, 5]):
             # TODO: WOWA LP
             print("TODO: WOWA LP")
 
+
 def question_1_4(nb_agents_list=[5, 10, 15]):
     """
     Analysis of execution time for WOWA problems of various sizes.
     """
 
-    avg_times = [] # average execution time for each pair (n,p)
+    avg_times = []  # average execution time for each pair (n,p)
     for nb_agents in nb_agents_list:
         nb_items = 5 * nb_agents
         times = []
@@ -169,19 +178,24 @@ def question_1_4(nb_agents_list=[5, 10, 15]):
     # plt.savefig("question_1_4_"+datetime.datetime.now().strftime("%Y%m%d_%H%M%S")+".png")
     # plt.show()
 
+
 def question_2_2():
     """
     Analysis of some solutions found for the given Choquet example using the Choquet integral.
     """
 
-    max_mean_solution, _ = OWA_LP(nb_criteria, nb_choices, utilities, [1/nb_choices]*nb_choices)
+    filepath = "choquet_example.txt"
+    nb_objectives, nb_projects, utilities, costs = parse_Choquet_problem(filepath)
+    
+    # max_mean_solution, _ = OWA_LP(nb_criteria, nb_choices, utilities, [1 / nb_choices] * nb_choices)
 
+    solutions, temps = choquet_lp(nb_objectifs, nb_projets, costs, utilities)
 
+    print(solutions)
 
 # -------- Main -------- #
 
 if __name__ == "__main__":
-
     print("Multi-objective Optimisation")
 
     seed = 0
@@ -191,5 +205,7 @@ if __name__ == "__main__":
     #solve_OWA_problem()
     #question_1_1(alpha_max=10, plot_figures=True)
     #question_1_2([i for i in range(3, 15)])
-    question_1_2(one_to_one=False)
+    #question_1_2(one_to_one=False)
     #question_1_3()
+
+    #question_2_2()
