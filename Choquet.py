@@ -54,7 +54,7 @@ def choquet_lp(n, p, costs, utilities, mobius_masses, combinations=None):
         # The value y_A of a subset of objectives A is the sum of the utilities of the selected projects for those objectives
         for subset_index, subset_obj in enumerate(combinations):
             for i in subset_obj:
-                m.addConstr(quicksum(utilities[i-1][j] * z[j] for j in range(p)) >= y[subset_index], name="y_"+str(subset_index)+"_"+str(i))
+                m.addConstr(quicksum(utilities[i][j] * z[j] for j in range(p)) >= y[subset_index], name="y_"+str(subset_index)+"_"+str(i))
 
         m.write("choquet.lp")
 

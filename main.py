@@ -326,7 +326,7 @@ if __name__ == "__main__":
     # question_1_2(one_to_one=False)
     # question_1_3()
 
-    # question_2_2(10)
+    question_2_2(10)
     # question_2_3()
-    plot_question_2_3()
+    # plot_question_2_3()
 
