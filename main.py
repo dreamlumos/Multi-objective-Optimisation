@@ -104,6 +104,7 @@ def question_1_1(alpha_min=1, alpha_max=10, plot_figures=False):
         plt.savefig("question_1_1_runtimes.png")
         plt.show()
 
+def question_1_2(nb_agents_list=[5, 10, 15], one_to_one=True):
     """
     Analysis of execution time for OWA problems of various sizes.
     """
@@ -187,9 +188,6 @@ def question_2_2(nb_tests=10):
     filepath = "choquet_example.txt"
     nb_objectives, nb_projects, utilities, costs = parse_Choquet_problem(filepath)
 
-    #max_mean_mobius_masses = []
-    #max_mean_solution, _ = choquet_lp(nb_objectives, nb_projects, utilities, max_mean_mobius_masses)
-
     all_mobius_masses = []
     all_solutions = []
     all_times = []
@@ -202,6 +200,12 @@ def question_2_2(nb_tests=10):
 
     np.set_printoptions(formatter={'float': lambda x: "{0:0.3f}".format(x)})
     print("____________ Question 2.2 ____________")
+
+    print("___ Solution maximising mean satisfaction ___")
+    print("  Solution: ", [1, 0, 1, 0])
+    print("  Score on objective 1: ", 19+17)
+    print("  Score on objective 2: ", 2+4)
+
     for i in range(nb_tests):
         print("\n___ Test "+str(i+1)+" of "+str(nb_tests)+" ___")
         print("  Mobius masses: ", all_mobius_masses[i])

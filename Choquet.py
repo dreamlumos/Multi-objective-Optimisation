@@ -8,7 +8,7 @@ from utils import *
 
 # -------- Choquet LP -------- #
 
-def choquet_lp(n, p, costs, utilities, mobius_masses=None):
+def choquet_lp(n, p, costs, utilities, mobius_masses):
     """
     :param n: number of objectives
     :param p: number of projects
