@@ -103,7 +103,6 @@ def question_1_1(alpha_min=1, alpha_max=10, plot_figures=False):
         plt.savefig("question_1_1_runtimes.png")
         plt.show()
 
-
     """
     Analysis of execution time for OWA problems of various sizes.
     """
@@ -186,12 +185,13 @@ def question_2_2():
 
     filepath = "choquet_example.txt"
     nb_objectives, nb_projects, utilities, costs = parse_Choquet_problem(filepath)
-    
+
     # max_mean_solution, _ = OWA_LP(nb_criteria, nb_choices, utilities, [1 / nb_choices] * nb_choices)
 
     solutions, temps = choquet_lp(nb_objectives, nb_projects, costs[0], utilities)
 
     print("Execution time: ", temps)
+
 
 # -------- Main -------- #
 
@@ -201,11 +201,11 @@ if __name__ == "__main__":
     seed = 0
     random.seed(seed)
 
-    #solve_OWA_problem("owa_example.txt", alpha=1, verbose=True)
-    #solve_OWA_problem()
-    #question_1_1(alpha_max=10, plot_figures=True)
-    #question_1_2([i for i in range(3, 15)])
-    #question_1_2(one_to_one=False)
-    #question_1_3()
+    # solve_OWA_problem("owa_example.txt", alpha=1, verbose=True)
+    # solve_OWA_problem()
+    # question_1_1(alpha_max=10, plot_figures=True)
+    # question_1_2([i for i in range(3, 15)])
+    # question_1_2(one_to_one=False)
+    # question_1_3()
 
     question_2_2()
