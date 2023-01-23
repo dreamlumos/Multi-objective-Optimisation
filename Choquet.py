@@ -63,7 +63,7 @@ def choquet_lp(n, p, costs, utilities):
         mobius = np.random.dirichlet([1 for j in range(len(combinaisons))])
 
         # Set objective
-        # m.setObjective(quicksum(v[i]*z[i] for i in range(n)), GRB.MAXIMIZE)
+        m.setObjective(mobius @ y, GRB.MAXIMIZE)
 
         m.write("choquet.lp")
 
