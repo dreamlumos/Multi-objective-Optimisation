@@ -224,19 +224,29 @@ def question_2_3():
 
     f = open("question_2_3.txt", "w")
 
+    print("========== (2.3) START ==========")
+
     for n in list_n:
         for p in list_p:
             list_times = []  # liste du temps d'exécution des matrices U
 
+            # générer toutes les combinaisons de projets possibles
+            projects_list = [i for i in range(p)]
+            all_combinations = powerset(projects_list)
+
             for i in range(num_matrices):
+                print(f"---------- n={n} p={p} u={i} ----------")
                 # matrice U de taille (n, p) avec des coefficients aléatoire entre 1 et 20
                 utilities = np.random.randint(1, 21, size=(n, p))
 
                 # liste de taille p des couts des projets tirés aléatoirement entre 10 et 100
                 costs = np.random.randint(10, 101, size=p)
 
+                # générer les masses de mobius
+                mobius_masses = belief_function_generator(p)
+
                 # optimisation de l'intégrale de choquet
-                solution, time = choquet_lp(n, p, costs, utilities)
+                solution, time = choquet_lp(n, p, costs, utilities, mobius_masses, liste_combinaisons=all_combinations)
 
                 # ajout du temps d'exécution dans la liste
                 list_times.append(time)
@@ -245,10 +255,13 @@ def question_2_3():
             dict_mean_time[(n, p)] = mean(list_times)
 
             # enregistrer la valeur dans un fichier
-            f.write(str(n) + "," + str(p) + "," + str(dict_mean_time[(n, p)])+ "\n")
-            print(f"({n}, {p}) : {dict_mean_time[(n, p)]}")
+            f.write(str(n) + "," + str(p) + "," + str(dict_mean_time[(n, p)]) + "\n")
+            print(f"Temps d'exécution moyen pour ({n}, {p}) : {dict_mean_time[(n, p)]}")
+
+    print("========== (2.3) END ==========")
 
     # affichage des temps moyens d'exécution pour les couples (n, p)
+    print("Temps d'exécution moyen : ")
     for n in list_n:
         for p in list_p:
             print(f"({n}, {p}) : {dict_mean_time[(n, p)]}")
@@ -271,5 +284,5 @@ if __name__ == "__main__":
     # question_1_2(one_to_one=False)
     # question_1_3()
 
-    question_2_2(10)
-    # question_2_3()
+    # question_2_2(10)
+    question_2_3()
