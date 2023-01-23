@@ -280,6 +280,37 @@ def question_2_3(n_list=[2, 5, 10], p_list=[5, 10, 15, 20]):
     plt.show()
 
 
+def plot_question_2_3():
+    f = open("question_2_3.txt", "r")
+    lines = f.readlines()
+
+    n_list = []
+    p_list = []
+    runtimes = {}
+
+    for line in lines:
+        split_line = line.strip("\n").split(",")
+        n = int(split_line[0])
+        p = int(split_line[1])
+        time = float(split_line[2])
+        if n not in n_list:
+            n_list.append(n)
+        if p not in p_list:
+            p_list.append(p)
+        runtimes[(n, p)] = time
+
+    plt.title("Average execution times for Choquet problems of various sizes")
+    plt.xlabel("Size in number of objectives n")
+    plt.ylabel("Average Gurobi Runtime for 10 instances (seconds)")
+    for p in p_list:
+        plt.plot(n_list, [runtimes[(n, p)] for n in n_list])
+    plt.legend([str(i) + " projects" for i in p_list])
+    plt.savefig("question_2_3_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".png")
+    plt.show()
+
+    f.close()
+
+
 # -------- Main -------- #
 
 if __name__ == "__main__":
@@ -296,4 +327,6 @@ if __name__ == "__main__":
     # question_1_3()
 
     # question_2_2(10)
-    question_2_3(n_list=[2, 5], p_list=[5, 10, 15])
+    # question_2_3()
+    plot_question_2_3()
+
