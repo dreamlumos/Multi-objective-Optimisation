@@ -7,17 +7,19 @@ from gurobipy import GRB, quicksum
 
 # -------- Choquet LP -------- #
 
-def choquet_lp(n, p, costs, utilities):
+def choquet_lp(n, p, costs, utilities, mobius_masses=None):
     """
     :param n: number of objectives
     :param p: number of projects
     :param costs: costs for each project: [c1, ..., ck] with k in {1, ..., p}
     :param utilities: U
+    :param mobius_masses: Mobius masses
 
     :type n: int
     :type p: int
     :type costs: ndarray[int]
     :type utilities: ndarray[int]
+    :type mobius_masses: ndarray[float]
 
     :return solution: x
     :rtype: ndarray[int]
@@ -60,7 +62,10 @@ def choquet_lp(n, p, costs, utilities):
             m.addConstr(quicksum(z[i][j] for i in range(n)) >= y[j], name="aptitude_"+str(ss))
 
         # calculer les masses de mobius
-        mobius = np.random.dirichlet([1 for j in range(len(combinaisons))])
+        if mobius_masses:
+            mobius = mobius_masses
+        else:
+            mobius = np.random.dirichlet([1 for j in range(len(combinaisons))])
 
         # Set objective
         m.setObjective(mobius @ y, GRB.MAXIMIZE)
@@ -75,10 +80,10 @@ def choquet_lp(n, p, costs, utilities):
         indices = [i for i, x in enumerate(y.X) if x == max_value]
         solutions = [combinaisons[i] for i in indices]
 
+        print("X: ", x.X)
         print("Y: ", y.X)
         print("Solutions: ", solutions)
-        print("X: ", x.X)
-        # print('Obj: %g' % m.objVal)
+        print('Obj: %g' % m.objVal)
 
     except gp.GurobiError as e:
         print('Error code ' + str(e.errno) + ": " + str(e))
