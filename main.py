@@ -206,7 +206,7 @@ def question_2_2(t):
 
 def question_2_3():
     list_n = [2, 5, 10]  # liste des nombres d'objectifs
-    list_p = [5, 10, 10, 20]  # liste des nombres de projets
+    list_p = [5, 10, 15, 20]  # liste des nombres de projets
     num_matrices = 10  # nombre de matrices à générer aléatoirement
     dict_mean_time = {}  # dictionnaire du temps moyen d'exécution pour un couple (n,p)
 
@@ -234,6 +234,7 @@ def question_2_3():
 
             # enregistrer la valeur dans un fichier
             f.write(str(n) + "," + str(p) + "," + str(dict_mean_time[(n, p)]))
+            print(f"({n}, {p}) : {dict_mean_time[(n, p)]}")
 
     # affichage des temps moyens d'exécution pour les couples (n, p)
     for n in list_n:
