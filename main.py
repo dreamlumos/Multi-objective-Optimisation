@@ -192,7 +192,7 @@ def question_2_2(nb_tests=10):
     all_solutions = []
     all_times = []
     for i in range(nb_tests):
-        mobius_masses = belief_function_generator(nb_projects)
+        mobius_masses = belief_function_generator(nb_objectives)
         solution, time = choquet_lp(nb_objectives, nb_projects, costs, utilities, mobius_masses)
         all_mobius_masses.append(mobius_masses)
         all_solutions.append(solution)
