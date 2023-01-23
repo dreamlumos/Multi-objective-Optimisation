@@ -1,8 +1,9 @@
 import numpy as np
-import itertools
 import random
 import gurobipy as gp
 from gurobipy import GRB, quicksum
+
+from utils import *
 
 
 # -------- Choquet LP -------- #
@@ -25,38 +26,33 @@ def choquet_lp(n, p, costs, utilities, mobius_masses=None):
     :rtype: ndarray[int]
     """
 
+    # Avoir toutes les combinaisons de projets possibles
+    projects_list = [i for i in range(p)]
+    combinations = powerset(projects_list)
+
     try:
         # Create a new model
         m = gp.Model("Choquet")
 
-        # Avoir toutes les combinaisons de projets possibles
-        liste_projets = [i for i in range(p)]
-        combinaisons = []
-        for i in range(len(liste_projets) + 1):
-            combinaisons.extend(list(itertools.combinations(liste_projets, i)))
-
-        # variable binaire pour savoir quel projet est sélectionné
-        x = m.addMVar(shape=p, vtype=GRB.BINARY, name="x")
-
-        # le coût total des projets sélectionnés ne dépasse pas l'enveloppe budgétaire fixée
-        b = sum(costs) / 2  # l'enveloppe budgétaire
-        m.addConstr(quicksum(costs[i] * x[i] for i in range(p)) <= b, name="budget")
-
-        y = m.addMVar(shape=len(combinaisons), vtype=GRB.CONTINUOUS, name="y")
-        for k, ss in enumerate(combinaisons):
-            for i in range(n):
-                # contrainte sur l'aptitude d'un ensemble de projets ss z_i(ss)
-                # à satisfaire l'objectif i est définie comme la somme des utilités uij des projets j sélectionnés
-                m.addConstr(quicksum(utilities[i][j] * x[j] for j in ss) >= y[k], name="aptitude_"+str(i)+"_"+str(k))
-
-        # calculer les masses de mobius
-        if mobius_masses:
-            mobius = mobius_masses
-        else:
-            mobius = np.random.dirichlet([1 for j in range(len(combinaisons))])
+        # Create y variables that indicate value of a subset
+        y = m.addMVar(shape=len(combinations), vtype=GRB.CONTINUOUS, name="y")
 
         # Set objective
-        m.setObjective(mobius @ y, GRB.MAXIMIZE)
+        m.setObjective(mobius_masses @ y, GRB.MAXIMIZE)
+
+        # variables binaires pour savoir quels projets sont sélectionnés
+        x = m.addMVar(shape=p, vtype=GRB.BINARY, name="x")
+
+        # le coût total des projets sélectionnés ne doit pas dépasser l'enveloppe budgétaire fixée
+        b = sum(costs) / 2  # l'enveloppe budgétaire
+        m.addConstr(costs @ x <= b, name="budget")
+
+        # contraintes sur l'aptitude d'un ensemble de projets ss z_i(ss)
+        # à satisfaire l'objectif i est définie comme la somme des utilités uij des projets j qui appartiennent à l'ensemble   
+        for k, ss in enumerate(combinations):
+            for i in range(n):
+                m.addConstr(quicksum(utilities[i][j] * x[j] for j in ss) >= y[k], name="aptitude_"+str(i)+"_"+str(k))
+
 
         m.write("choquet.lp")
 

@@ -179,7 +179,7 @@ def question_1_4(nb_agents_list=[5, 10, 15]):
     # plt.show()
 
 
-def question_2_2(t):
+def question_2_2(nb_tests=10):
     """
     Analysis of some solutions found for the given Choquet example using the Choquet integral.
     """
@@ -191,8 +191,9 @@ def question_2_2(t):
 
     all_solutions = []
     all_times = []
-    for i in range(t):
-        solution, time = choquet_lp(nb_objectives, nb_projects, costs[0], utilities)
+    for i in range(nb_tests):
+        mobius_masses = belief_function_generator(nb_projects)
+        solution, time = choquet_lp(nb_objectives, nb_projects, costs[0], utilities, mobius_masses)
         all_solutions.append(solution)
         all_times.append(time)
 
@@ -233,7 +234,7 @@ def question_2_3():
             dict_mean_time[(n, p)] = mean(list_times)
 
             # enregistrer la valeur dans un fichier
-            f.write(str(n) + "," + str(p) + "," + str(dict_mean_time[(n, p)]))
+            f.write(str(n) + "," + str(p) + "," + str(dict_mean_time[(n, p)])+ "\n")
             print(f"({n}, {p}) : {dict_mean_time[(n, p)]}")
 
     # affichage des temps moyens d'exécution pour les couples (n, p)
@@ -259,5 +260,5 @@ if __name__ == "__main__":
     # question_1_2(one_to_one=False)
     # question_1_3()
 
-    # question_2_2(10)
-    question_2_3()
+    question_2_2(1)
+    # question_2_3()
