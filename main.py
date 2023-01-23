@@ -216,37 +216,39 @@ def question_2_2(nb_tests=10):
     print("\nMean execution time: ", mean(all_times))
 
 
-def question_2_3():
-    list_n = [2, 5, 10]  # liste des nombres d'objectifs
-    list_p = [5, 10, 15, 20]  # liste des nombres de projets
-    num_matrices = 10  # nombre de matrices à générer aléatoirement
+def question_2_3(n_list=[2, 5, 10], p_list=[5, 10, 15, 20]):
+    """
+    Analysis of execution time for Choquet problems of various sizes.
+
+    :param n_list: list of nb_objectives to test
+    :param p_list: list of nb_projects to test
+    
+    :type n_list: list[int]
+    :type p_list: list[int]
+    """
+    
+    nb_instances = 10  # nombre de matrices à générer aléatoirement
     dict_mean_time = {}  # dictionnaire du temps moyen d'exécution pour un couple (n,p)
 
     f = open("question_2_3.txt", "w")
 
     print("========== (2.3) START ==========")
 
-    for n in list_n:
-        for p in list_p:
-            list_times = []  # liste du temps d'exécution des matrices U
+    for n in n_list:
+        for p in p_list:
+            list_times = []  # liste des temps d'exécution pour les instances de taille (n, p)
 
             # générer toutes les combinaisons de projets possibles
-            projects_list = [i for i in range(p)]
-            all_combinations = powerset(projects_list)
+            objectives_list = [i for i in range(n)]
+            combinations = powerset(objectives_list)
 
-            for i in range(num_matrices):
+            for i in range(nb_instances):
                 print(f"---------- n={n} p={p} u={i} ----------")
-                # matrice U de taille (n, p) avec des coefficients aléatoire entre 1 et 20
-                utilities = np.random.randint(1, 21, size=(n, p))
-
-                # liste de taille p des couts des projets tirés aléatoirement entre 10 et 100
-                costs = np.random.randint(10, 101, size=p)
-
-                # générer les masses de mobius
-                mobius_masses = belief_function_generator(p)
+                
+                utilities, costs, mobius_masses = generate_Choquet_problem(n, p)
 
                 # optimisation de l'intégrale de choquet
-                solution, time = choquet_lp(n, p, costs, utilities, mobius_masses, liste_combinaisons=all_combinations)
+                solution, time = choquet_lp(n, p, costs, utilities, mobius_masses, combinations)
 
                 # ajout du temps d'exécution dans la liste
                 list_times.append(time)
@@ -262,11 +264,20 @@ def question_2_3():
 
     # affichage des temps moyens d'exécution pour les couples (n, p)
     print("Temps d'exécution moyen : ")
-    for n in list_n:
-        for p in list_p:
+    for n in n_list:
+        for p in p_list:
             print(f"({n}, {p}) : {dict_mean_time[(n, p)]}")
 
     f.close()
+
+    plt.title("Average execution times for Choquet problems of various sizes")
+    plt.xlabel("Size in number of projects p")
+    plt.ylabel("Average Gurobi Runtime for 10 instances (seconds)")
+    for n in n_list:
+        plt.plot(p_list, [dict_mean_time[(n, p)] for p in p_list])
+    plt.legend([str(i)+" objectives" for i in n_list])
+    plt.savefig("question_2_3_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".png")
+    plt.show()
 
 
 # -------- Main -------- #
@@ -285,4 +296,4 @@ if __name__ == "__main__":
     # question_1_3()
 
     # question_2_2(10)
-    question_2_3()
+    question_2_3(n_list=[2, 5], p_list=[5, 10, 15])
