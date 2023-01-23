@@ -28,6 +28,7 @@ def parse_problem(filepath, problem_type='OWA'):
         costs = []
         if problem_type.casefold() == 'Choquet'.casefold():
             costs.append(read_ints(file))
+        costs = np.array(costs)
 
     return nb_objectives, nb_choices, utilities, costs
 
