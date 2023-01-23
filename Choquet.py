@@ -73,4 +73,4 @@ def choquet_lp(n, p, costs, utilities, mobius_masses=None):
     except AttributeError:
         print('Encountered an attribute error')
 
-    return x, m.Runtime
+    return x.X, m.Runtime
