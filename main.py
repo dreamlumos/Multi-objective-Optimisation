@@ -50,7 +50,7 @@ def question_1_1(alpha_min=1, alpha_max=10, plot_figures=False):
     Analysis of solutions for the given example depending on the value of alpha.
     """
 
-    print("Question 1.1 : Analysis of solutions for the given example depending on the value of alpha.")
+    print("Question 1.1: Analysis of solutions for the given example depending on the value of alpha.")
 
     filepath = "owa_example.txt"
     nb_agents, nb_items, utilities = parse_OWA_problem(filepath)
@@ -187,22 +187,29 @@ def question_2_2(nb_tests=10):
     filepath = "choquet_example.txt"
     nb_objectives, nb_projects, utilities, costs = parse_Choquet_problem(filepath)
 
-    # max_mean_solution, _ = OWA_LP(nb_criteria, nb_choices, utilities, [1 / nb_choices] * nb_choices)
+    #max_mean_mobius_masses = []
+    #max_mean_solution, _ = choquet_lp(nb_objectives, nb_projects, utilities, max_mean_mobius_masses)
 
+    all_mobius_masses = []
     all_solutions = []
     all_times = []
     for i in range(nb_tests):
         mobius_masses = belief_function_generator(nb_projects)
-        solution, time = choquet_lp(nb_objectives, nb_projects, costs[0], utilities, mobius_masses)
+        solution, time = choquet_lp(nb_objectives, nb_projects, costs, utilities, mobius_masses)
+        all_mobius_masses.append(mobius_masses)
         all_solutions.append(solution)
         all_times.append(time)
 
-    original_list = [tuple(lst) for lst in all_solutions]
-    unique_list = list(set(original_list))
-    unique_list = [list(tpl) for tpl in unique_list]
-
-    print("Solutions: ", unique_list)
-    print("Mean execution time: ", mean(all_times))
+    np.set_printoptions(formatter={'float': lambda x: "{0:0.3f}".format(x)})
+    print("____________ Question 2.2 ____________")
+    for i in range(nb_tests):
+        print("\n___ Test "+str(i+1)+" of "+str(nb_tests)+" ___")
+        print("  Mobius masses: ", all_mobius_masses[i])
+        print("  Solution: ", all_solutions[i])
+        print("  Score on objective 1: ", np.sum(utilities[0] * all_solutions[i]))
+        print("  Score on objective 2: ", np.sum(utilities[1] * all_solutions[i]))
+    
+    print("\nMean execution time: ", mean(all_times))
 
 
 def question_2_3():
@@ -260,5 +267,5 @@ if __name__ == "__main__":
     # question_1_2(one_to_one=False)
     # question_1_3()
 
-    question_2_2(1)
+    question_2_2(10)
     # question_2_3()
