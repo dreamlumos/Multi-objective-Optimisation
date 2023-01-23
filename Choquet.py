@@ -38,7 +38,7 @@ def choquet_lp(n, p, costs, utilities):
 
         # le coût total des projets sélectionnés ne dépasse pas l'enveloppe budgétaire fixée
         b = sum(costs) / 2  # l'enveloppe budgétaire
-        m.addConstrs(quicksum(costs[i] * s[i] for i in range(p)) <= b, name="budget")
+        m.addConstr(quicksum(costs[i] * s[i] for i in range(p)) <= b, name="budget")
 
         # z[i][x] : aptitude d'un ensemble de projets x à satisfaire l'objectif i
         # est définie comme la somme des utilités uij des projets j sélectionnés
@@ -55,21 +55,20 @@ def choquet_lp(n, p, costs, utilities):
                     z[i].append(somme)
         z = np.array(z)
 
-        y = m.addMVar(shape=n, vtype=GRB.CONTINUOUS, name="y")
-        m.addConstrs((y[i] < z[i] for i in range(n)), name="aptitude")
+        y = m.addMVar(shape=len(combinaisons), vtype=GRB.CONTINUOUS, name="y")
+        for j, x in enumerate(combinaisons):
+            m.addConstr(quicksum(z[i][j] for i in range(n)) >= y[j], name="aptitude_"+str(x))
 
         # calculer les masses de mobius
         mobius = []
-        for i in range(n):
-            mobius.append([])
-            for x in combinaisons:
-                if len(x) == 0:
-                    mobius[i].append(0)
-                elif len(x) == p:
-                    mobius[i].append(1)
-                else:
-                    epsilon = 1e-9  # pour éviter d'avoir 0 ou 1
-                    mobius[i].append(random.uniform(0 + epsilon, 1 - epsilon))
+        for x in combinaisons:
+            if len(x) == 0:
+                mobius.append(0)
+            elif len(x) == p:
+                mobius.append(1)
+            else:
+                epsilon = 1e-9  # pour éviter d'avoir 0 ou 1
+                mobius.append(random.uniform(0 + epsilon, 1 - epsilon))
         mobius = np.array(mobius)
 
         # Set objective
