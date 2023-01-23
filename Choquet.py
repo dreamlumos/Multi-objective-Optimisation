@@ -8,27 +8,31 @@ from utils import *
 
 # -------- Choquet LP -------- #
 
-def choquet_lp(n, p, costs, utilities, mobius_masses=None):
+def choquet_lp(n, p, costs, utilities, mobius_masses, liste_combinaisons=None):
     """
     :param n: number of objectives
     :param p: number of projects
     :param costs: costs for each project: [c1, ..., ck] with k in {1, ..., p}
     :param utilities: U
     :param mobius_masses: Mobius masses
+    :param liste_combinaisons: liste de toutes les combinaisons de projets possibles
 
     :type n: int
     :type p: int
     :type costs: ndarray[int]
     :type utilities: ndarray[int]
     :type mobius_masses: ndarray[float]
+    :type liste_combinaisons: list[tuple[int]]
 
     :return solution: x
     :rtype: ndarray[int]
     """
 
-    # Avoir toutes les combinaisons de projets possibles
-    projects_list = [i for i in range(p)]
-    combinations = powerset(projects_list)
+    if liste_combinaisons:
+        combinations = liste_combinaisons
+    else:  # Avoir toutes les combinaisons de projets possibles
+        projects_list = [i for i in range(p)]
+        combinations = powerset(projects_list)
 
     try:
         # Create a new model
@@ -37,22 +41,22 @@ def choquet_lp(n, p, costs, utilities, mobius_masses=None):
         # Create y variables that indicate value of a subset
         y = m.addMVar(shape=len(combinations), vtype=GRB.CONTINUOUS, name="y")
 
-        # Set objective
-        m.setObjective(mobius_masses @ y, GRB.MAXIMIZE)
-
         # variables binaires pour savoir quels projets sont sélectionnés
         x = m.addMVar(shape=p, vtype=GRB.BINARY, name="x")
+
+        # Set objective
+        m.setObjective(mobius_masses @ y, GRB.MAXIMIZE)
 
         # le coût total des projets sélectionnés ne doit pas dépasser l'enveloppe budgétaire fixée
         b = sum(costs) / 2  # l'enveloppe budgétaire
         m.addConstr(costs @ x <= b, name="budget")
 
-        # contraintes sur l'aptitude d'un ensemble de projets ss z_i(ss)
-        # à satisfaire l'objectif i est définie comme la somme des utilités uij des projets j qui appartiennent à l'ensemble   
+        # contraintes sur l'aptitude d'un ensemble de projets ss z_i(ss) à satisfaire l'objectif i
+        # est définie comme la somme des utilités uij des projets j qui appartiennent à l'ensemble
         for k, ss in enumerate(combinations):
             for i in range(n):
+                # print(f"({n}, {p}) : add constraint aptitude_{i}_{k}")
                 m.addConstr(quicksum(utilities[i][j] * x[j] for j in ss) >= y[k], name="aptitude_"+str(i)+"_"+str(k))
-
 
         m.write("choquet.lp")
 
