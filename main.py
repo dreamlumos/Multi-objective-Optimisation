@@ -80,6 +80,7 @@ def question_1_1(alpha_min=1, alpha_max=10, plot_figures=False):
         ax1.title.set_text("Satisfaction of each agent")
         ax1.set_xticks(x)
         ax1.set_xticklabels(["Agent "+str(i) for i in range(1, nb_agents+1)])
+        ax1.set_yticks(range(0, 21, 2))
         fig1.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=[ax1], label='alpha')
         plt.savefig("question_1_1_solution.png")
 
@@ -95,7 +96,7 @@ def question_1_1(alpha_min=1, alpha_max=10, plot_figures=False):
         plt.savefig("question_1_1_runtimes.png")
         plt.show()
 
-def question_1_2(nb_agents_list=[5, 10, 15]):
+def question_1_2(nb_agents_list=[5, 10, 15], one_to_one=True):
     """
     Analysis of execution time for OWA problems of various sizes.
     """
@@ -107,7 +108,7 @@ def question_1_2(nb_agents_list=[5, 10, 15]):
         for i in range(10):
             utilities = generate_OWA_problem(nb_agents, nb_items)
             weights = OWA_weights_generator(nb_agents)
-            solution, runtime = OWA_LP(nb_agents, nb_items, utilities, weights, one_to_one=True)
+            solution, runtime = OWA_LP(nb_agents, nb_items, utilities, weights, one_to_one=one_to_one)
             times.append(runtime)
         avg_times.append(np.mean(times))
 
@@ -188,6 +189,7 @@ if __name__ == "__main__":
 
     #solve_OWA_problem("owa_example.txt", alpha=1, verbose=True)
     #solve_OWA_problem()
-    question_1_1(alpha_max=40, plot_figures=True)
+    #question_1_1(alpha_max=10, plot_figures=True)
     #question_1_2([i for i in range(3, 15)])
+    question_1_2(one_to_one=False)
     #question_1_3()

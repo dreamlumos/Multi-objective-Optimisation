@@ -44,7 +44,7 @@ def generate_OWA_problem(nb_agents, nb_items):
     Generates utilities for a problem to be resolved with OWA.
     """
 
-    return np.random.randint(30, size=(nb_agents, nb_items))
+    return np.random.randint(50, size=(nb_agents, nb_items))
 
 def OWA_weights_generator(n, alpha=None):
 
@@ -55,7 +55,7 @@ def OWA_weights_generator(n, alpha=None):
     if alpha < 1:
         print("Error: alpha must be greater than or equals to 1.") 
 
-    weights = [((n-i+1)/2)**alpha - ((n-i)/n)**alpha for i in range(n)]
+    weights = [((n-i+1)/n)**alpha - ((n-i)/n)**alpha for i in range(n)]
     return np.array(weights)
 
 def lorenz_vector(x):
