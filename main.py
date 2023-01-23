@@ -6,6 +6,7 @@ import random
 import numpy as np
 
 from OWA import *
+from WOWA import *
 from Choquet import *
 from utils import *
 
@@ -80,7 +81,6 @@ def question_1_1(alpha_min=1, alpha_max=10, plot_figures=False):
 
     print("____________________________")
     print("Utilities:", utilities)
-    print("Solution:", solution)
 
     if plot_figures:
         plt.figure(1)
@@ -109,7 +109,7 @@ def question_1_2(nb_agents_list=[5, 10, 15], one_to_one=True):
     Analysis of execution time for OWA problems of various sizes.
     """
 
-    avg_times = []  # average execution time for each pair (n,p)
+    avg_times = [] # average execution time for each pair (n,p)
     for nb_agents in nb_agents_list:
         nb_items = 5 * nb_agents
         times = []
@@ -129,7 +129,7 @@ def question_1_2(nb_agents_list=[5, 10, 15], one_to_one=True):
     plt.show()
 
 
-def question_1_3(alpha_list=[2, 5]):
+def question_1_3(alpha_list=[2, 5], plot_figures=False):
     """
     Analysis of the evolution of solutions when the p vector is varied for the values of alpha provided.
     """
@@ -137,22 +137,59 @@ def question_1_3(alpha_list=[2, 5]):
     filepath = "owa_example.txt"
     nb_agents, nb_items, utilities = parse_OWA_problem(filepath)
 
+    # Bar chart configurations
+    width = 1 / 8
+    x = [i + 0.5 for i in range(nb_agents)]
+    figures = [None]*len(alpha_list)
+    axes = [None]*len(alpha_list)
+    for i in range(len(alpha_list)):
+        figures[i], axes[i] = plt.subplots(5, figsize=(6.6, 6))
+    cmap = mpl.cm.get_cmap('Reds')
+    norm = mpl.colors.Normalize(vmin=1, vmax=5)
+    colours = [cmap(i) for i in np.linspace(0.1, 1, num=6)]
+
     p_list = []
     equality_component = 1 / nb_agents
     for extremum_i in range(nb_agents):  # for each extremum
-        for step in range(1, nb_agents):  # nb of steps
+        p_sublist = []
+        for step in range(1, nb_agents+1):  # nb of steps
+            new_p = [0] * nb_agents
             for component_i in range(nb_agents):  # for each component of the vector
-                new_p = [0] * nb_agents
                 if component_i == extremum_i:
                     new_p[component_i] = step * equality_component
                 else:
                     new_p[component_i] = (1 - (step * equality_component)) / (nb_agents - 1)
-                p_list.append(new_p)
+            p_sublist.append(new_p)
+        p_list.append(p_sublist)
 
-    for alpha in alpha_list:
-        for p in p_list:
-            # TODO: WOWA LP
-            print("TODO: WOWA LP")
+    for alpha_i in range(len(alpha_list)):
+        alpha = alpha_list[alpha_i]
+        for extremum_i in range(nb_agents):
+            for exp in range(nb_agents):
+                p = p_list[extremum_i][exp]
+                mobius_masses = WOWA_mobius_mass_generator(p, alpha)
+                solution, runtime = WOWA_LP(nb_agents, nb_items, utilities, mobius_masses, one_to_one=True)
+                axes[alpha_i][extremum_i].bar([i + width + exp * (1 / 6) for i in range(nb_agents)], solution, width=width, color=colours[exp])
+                print("_______")
+                print("p:", p)
+                print("mobius: ", mobius_masses)
+
+    print("____________________________")
+    print("Utilities:", utilities)
+
+    if plot_figures:
+        for alpha_i in range(len(alpha_list)):
+            plt.figure(alpha_i+1)
+            for extremum_i in range(nb_agents):
+                # axes[alpha_i][extremum_i].title.set_text("Satisfaction of each agent")
+                axes[alpha_i][extremum_i].set_xticks(x)
+                axes[alpha_i][extremum_i].set_xticklabels(["Agent " + str(i) for i in range(1, nb_agents + 1)])
+                axes[alpha_i][extremum_i].set_yticks(range(0, 21, 5))
+                axes[alpha_i][extremum_i].label_outer()
+
+                figures[alpha_i].colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=[axes[alpha_i][extremum_i]], label='step')
+            plt.savefig("question_1_3_plot_"+str(alpha_i)+".png")
+        plt.show()
 
 
 def question_1_4(nb_agents_list=[5, 10, 15]):
@@ -160,24 +197,30 @@ def question_1_4(nb_agents_list=[5, 10, 15]):
     Analysis of execution time for WOWA problems of various sizes.
     """
 
-    avg_times = []  # average execution time for each pair (n,p)
+    avg_times = [] # average execution time for each pair (n,p)
     for nb_agents in nb_agents_list:
         nb_items = 5 * nb_agents
         times = []
         for i in range(10):
             utilities = generate_OWA_problem(nb_agents, nb_items)
-            # TODO: p generator
-            # TODO: WOWA LP
-            # times.append(runtime)
-        # avg_times.append(np.mean(times))
+            p = WOWA_importance_weights_generator(nb_agents)
+            alpha = random.randint(1, 10)
+            mobius_masses = WOWA_mobius_mass_generator(p, alpha)
+            print("Utilities: ", utilities)
+            print("p: ", p)
+            print("alpha: ", alpha)
+            print("mobius_masses: ", mobius_masses)
+            solution, runtime = WOWA_LP(nb_agents, nb_items, utilities, mobius_masses, one_to_one=True)
+            times.append(runtime)
+        avg_times.append(np.mean(times))
 
-    # np.savetxt("question_1_4_"+datetime.datetime.now().strftime("%Y%m%d_%H%M%S")+".csv", avg_times)
-    # plt.title("Average execution times for WOWA problems of various sizes")
-    # plt.xlabel("Size in number of agents n (with nb_items = 5*n)")
-    # plt.ylabel("Gurobi Runtime (seconds)")
-    # plt.plot(nb_agents_list, avg_times)
-    # plt.savefig("question_1_4_"+datetime.datetime.now().strftime("%Y%m%d_%H%M%S")+".png")
-    # plt.show()
+    np.savetxt("question_1_4_"+datetime.datetime.now().strftime("%Y%m%d_%H%M%S")+".csv", avg_times)
+    plt.title("Average execution times for WOWA problems of various sizes")
+    plt.xlabel("Size in number of agents n (with nb_items = 5*n)")
+    plt.ylabel("Gurobi Runtime (seconds)")
+    plt.plot(nb_agents_list, avg_times)
+    plt.savefig("question_1_4_"+datetime.datetime.now().strftime("%Y%m%d_%H%M%S")+".png")
+    plt.show()
 
 
 def question_2_2(nb_tests=10):
@@ -293,7 +336,8 @@ if __name__ == "__main__":
     # question_1_1(alpha_max=10, plot_figures=True)
     # question_1_2([i for i in range(3, 15)])
     # question_1_2(one_to_one=False)
-    # question_1_3()
+    # question_1_3(plot_figures=True)
+    question_1_4()
 
     # question_2_2(10)
-    question_2_3(n_list=[2, 5], p_list=[5, 10, 15])
+    # question_2_3(n_list=[2, 5], p_list=[5, 10, 15])

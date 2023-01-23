@@ -71,6 +71,38 @@ def OWA_weights_generator(n, alpha=None):
     weights = [((n-i+1)/n)**alpha - ((n-i)/n)**alpha for i in range(n)]
     return np.array(weights)
 
+def WOWA_importance_weights_generator(n):
+    return np.random.dirichlet([1 for i in range(n)])
+
+def WOWA_mobius_mass_generator(p, alpha):
+    """
+    Generates Mobius masses for the WOWA aggregator using the vector p of importance weights.
+    phi(x) = x^alpha
+
+    :param p: list of importance weights
+    :param alpha: value to be used in phi
+
+    :type p: list[int]
+    :type alpha: int
+    """
+
+    all_subsets = powerset([i for i in range(len(p))])
+
+    capacities = dict()
+    for A in all_subsets:
+        capacity = (sum([p[i] for i in A]))**alpha
+        capacities[A] = capacity
+
+    mobius_masses = []
+    for A in all_subsets:
+        all_subsubsets = powerset(A)
+        total = 0
+        for B in all_subsubsets:
+            total += ((-1)**(len(A)-len(B))) * capacities[B]
+        mobius_masses.append(round(total, 3))
+
+    return np.array(mobius_masses)
+
 def belief_function_generator(nb_elements):
     """
     Generates a random list of Mobius masses that correspond to a belief function.
