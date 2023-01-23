@@ -42,24 +42,12 @@ def choquet_lp(n, p, costs, utilities, mobius_masses=None):
         b = sum(costs) / 2  # l'enveloppe budgétaire
         m.addConstr(quicksum(costs[i] * x[i] for i in range(p)) <= b, name="budget")
 
-        # z[i][x] : aptitude d'un ensemble de projets x à satisfaire l'objectif i
-        # est définie comme la somme des utilités uij des projets j sélectionnés
-        z = []
-        for i in range(n):
-            z.append([])
-            for ss in combinaisons:
-                if len(ss) == 0:
-                    z[i].append(0)
-                else:
-                    somme = 0
-                    for j in ss:
-                        somme += utilities[i][j] * x[j]
-                    z[i].append(somme)
-        z = np.array(z)
-
         y = m.addMVar(shape=len(combinaisons), vtype=GRB.CONTINUOUS, name="y")
-        for j, ss in enumerate(combinaisons):
-            m.addConstr(quicksum(z[i][j] for i in range(n)) >= y[j], name="aptitude_"+str(ss))
+        for k, ss in enumerate(combinaisons):
+            for i in range(n):
+                # contrainte sur l'aptitude d'un ensemble de projets ss z_i(ss)
+                # à satisfaire l'objectif i est définie comme la somme des utilités uij des projets j sélectionnés
+                m.addConstr(quicksum(utilities[i][j] * x[j] for j in ss) >= y[k], name="aptitude_"+str(k))
 
         # calculer les masses de mobius
         if mobius_masses:
@@ -74,6 +62,7 @@ def choquet_lp(n, p, costs, utilities, mobius_masses=None):
 
         # Optimize model
         m.optimize()
+
         print("X: ", x.X)
         print("Y: ", y.X)
         print('Obj: %g' % m.objVal)
