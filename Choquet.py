@@ -74,15 +74,8 @@ def choquet_lp(n, p, costs, utilities, mobius_masses=None):
 
         # Optimize model
         m.optimize()
-
-        # Récupérer les solutions
-        max_value = max(y.X)
-        indices = [i for i, x in enumerate(y.X) if x == max_value]
-        solutions = [combinaisons[i] for i in indices]
-
         print("X: ", x.X)
         print("Y: ", y.X)
-        print("Solutions: ", solutions)
         print('Obj: %g' % m.objVal)
 
     except gp.GurobiError as e:
@@ -91,4 +84,4 @@ def choquet_lp(n, p, costs, utilities, mobius_masses=None):
     except AttributeError:
         print('Encountered an attribute error')
 
-    return solutions, m.Runtime
+    return x, m.Runtime
