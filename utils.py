@@ -1,3 +1,4 @@
+import itertools
 import numpy as np
 import random
 
@@ -58,6 +59,34 @@ def OWA_weights_generator(n, alpha=None):
 
     weights = [((n-i+1)/n)**alpha - ((n-i)/n)**alpha for i in range(n)]
     return np.array(weights)
+
+def belief_function_generator(nb_elements):
+    """
+    Returns a list of Mobius masses that correspond to a belief function.
+    """
+
+    nb_masses = 2**nb_elements
+
+    # Generate masses for all combinations besides the empty set
+    # Dirichlet creates a vector of values that are greater than zero and sum to one
+    # Note: this means that we won't have any non-empty subsets that have a mass of 0
+    mobius_masses = np.random.dirichlet([1 for j in range(nb_masses-1)])
+    # Add mass of zero for the empty set
+    mobius_masses = np.insert(mobius_masses, 0, 0)
+    print(mobius_masses)
+
+    return mobius_masses
+
+def powerset(full_set):
+    """
+    Generates the powerset (list of all subsets) of a given iterable.
+    """
+
+    combinations = []
+    for i in range(len(full_set) + 1):
+        combinations.extend(list(itertools.combinations(full_set, i)))
+
+    return combinations
 
 def lorenz_vector(x):
 
