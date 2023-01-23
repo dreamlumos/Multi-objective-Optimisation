@@ -47,7 +47,7 @@ def choquet_lp(n, p, costs, utilities, mobius_masses=None):
             for i in range(n):
                 # contrainte sur l'aptitude d'un ensemble de projets ss z_i(ss)
                 # à satisfaire l'objectif i est définie comme la somme des utilités uij des projets j sélectionnés
-                m.addConstr(quicksum(utilities[i][j] * x[j] for j in ss) >= y[k], name="aptitude_"+str(k))
+                m.addConstr(quicksum(utilities[i][j] * x[j] for j in ss) >= y[k], name="aptitude_"+str(i)+"_"+str(ss))
 
         # calculer les masses de mobius
         if mobius_masses:
