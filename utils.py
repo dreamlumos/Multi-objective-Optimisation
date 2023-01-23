@@ -28,7 +28,7 @@ def parse_problem(filepath, problem_type='OWA'):
 
         costs = []
         if problem_type.casefold() == 'Choquet'.casefold():
-            costs.append(read_ints(file))
+            costs = read_ints(file)
         costs = np.array(costs)
 
     return nb_objectives, nb_choices, utilities, costs
@@ -48,6 +48,17 @@ def generate_OWA_problem(nb_agents, nb_items):
 
     return np.random.randint(50, size=(nb_agents, nb_items))
 
+def generate_Choquet_problem(nb_objectives, nb_projects):
+    """
+    Generates utilities, costs and mobius masses for a problem to be resolved with Choquet.
+    """
+
+    utilities = np.random.randint(1, 21, size=(nb_objectives, nb_projects))
+    costs = np.random.randint(10, 101, size=nb_projects)
+    mobius_masses = belief_function_generator(nb_objectives)
+
+    return utilities, costs, mobius_masses
+
 def OWA_weights_generator(n, alpha=None):
 
     # Random generation of weights
@@ -62,7 +73,7 @@ def OWA_weights_generator(n, alpha=None):
 
 def belief_function_generator(nb_elements):
     """
-    Returns a list of Mobius masses that correspond to a belief function.
+    Generates a random list of Mobius masses that correspond to a belief function.
     """
 
     nb_masses = 2**nb_elements
@@ -73,7 +84,6 @@ def belief_function_generator(nb_elements):
     mobius_masses = np.random.dirichlet([1 for j in range(nb_masses-1)])
     # Add mass of zero for the empty set
     mobius_masses = np.insert(mobius_masses, 0, 0)
-    print(mobius_masses)
 
     return mobius_masses
 
