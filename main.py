@@ -348,8 +348,16 @@ def plot_question_2_3():
     for p in p_list:
         plt.plot(n_list, [runtimes[(n, p)] for n in n_list])
     plt.legend([str(i) + " projects" for i in p_list])
-    plt.savefig("question_2_3_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".png")
-    plt.show()
+    plt.savefig("question_2_3_times_size_projects.png")
+    plt.clf()
+
+    plt.title("Average execution times for Choquet problems of various sizes")
+    plt.xlabel("Size in number of projects p")
+    plt.ylabel("Average Gurobi Runtime for 10 instances (seconds)")
+    for n in n_list:
+        plt.plot(p_list, [runtimes[(n, p)] for p in p_list])
+    plt.legend([str(i) + " objectives" for i in n_list])
+    plt.savefig("question_2_3_times_size_objectives.png")
 
     f.close()
 
@@ -365,12 +373,12 @@ if __name__ == "__main__":
     # solve_OWA_problem("owa_example.txt", alpha=1, verbose=True)
     # solve_OWA_problem()
     # question_1_1(alpha_max=10, plot_figures=True)
-    # question_1_2([i for i in range(3, 15)])
+    # question_1_2([i for i in range(3, 30)])
     # question_1_2(one_to_one=False)
     # question_1_3(plot_figures=True)
     question_1_4()
 
-    question_2_2(10)
+    # question_2_2(10)
     # question_2_3()
     # plot_question_2_3()
 
