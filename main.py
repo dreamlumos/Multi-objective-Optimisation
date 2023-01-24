@@ -319,7 +319,17 @@ def question_2_3(n_list=[2, 5, 10], p_list=[5, 10, 15, 20]):
     for n in n_list:
         plt.plot(p_list, [dict_mean_time[(n, p)] for p in p_list])
     plt.legend([str(i)+" objectives" for i in n_list])
-    plt.savefig("question_2_3_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".png")
+    plt.savefig("question_2_3_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_obj.png")
+    plt.show()
+    plt.clf()
+
+    plt.title("Average execution times for Choquet problems of various sizes")
+    plt.xlabel("Size in number of objectives n")
+    plt.ylabel("Average Gurobi Runtime for 10 instances (seconds)")
+    for p in p_list:
+        plt.plot(n_list, [dict_mean_time[(n, p)] for n in n_list])
+    plt.legend([str(i) + " projects" for i in p_list])
+    plt.savefig("question_2_3_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_proj.png")
     plt.show()
 
 
