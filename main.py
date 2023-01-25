@@ -8,6 +8,7 @@ import numpy as np
 from OWA import *
 from WOWA import *
 from Choquet import *
+from Choquet_graph import *
 from utils import *
 
 
@@ -241,13 +242,17 @@ def question_2_2(nb_tests=10):
         all_solutions.append(solution)
         all_times.append(time)
 
+    max_mean_mobius_masses = np.array([0, 0.5, 0.5, 0])
+    max_mean_solution, time = choquet_lp(nb_objectives, nb_projects, costs, utilities, mobius_masses)
+
     np.set_printoptions(formatter={'float': lambda x: "{0:0.3f}".format(x)})
     print("____________ Question 2.2 ____________")
 
     print("___ Solution maximising mean satisfaction ___")
-    print("  Solution: ", [1, 0, 1, 0])
-    print("  Score on objective 1: ", 19+17)
-    print("  Score on objective 2: ", 2+4)
+    print("  Mobius masses: ", max_mean_mobius_masses)
+    print("  Solution: ", max_mean_solution)
+    print("  Score on objective 1: ", np.sum(utilities[0] * max_mean_solution))
+    print("  Score on objective 2: ", np.sum(utilities[1] * max_mean_solution))
 
     for i in range(nb_tests):
         print("\n___ Test "+str(i+1)+" of "+str(nb_tests)+" ___")
@@ -371,6 +376,30 @@ def plot_question_2_3():
 
     f.close()
 
+def question_graph():
+
+    n = 2 # Number of scenarios (number of objectives)
+
+    traveling_time = [[[0, 5, 10, 2, 999, 999, 999],
+                        [999, 0, 4, 1, 4, 999, 999],
+                        [999, 999, 0, 999, 3, 1, 0],
+                        [999, 999, 1, 0, 3, 3, 999],
+                        [999, 999, 999, 999, 0, 999, 1],
+                        [999, 999, 999, 999, 999, 0, 1],
+                        [999, 999, 999, 999, 999, 999, 0]],
+                    [[0, 3, 4, 6, 999, 999, 999],
+                        [999, 0, 2, 3, 6, 999, 999],
+                        [999, 999, 0, 999, 1, 1, 0],
+                        [999, 999, 4, 0, 999, 5, 999],
+                        [999, 999, 999, 999, 0, 999, 1],
+                        [999, 999, 999, 999, 999, 0, 1],
+                        [999, 999, 999, 999, 999, 999, 0]]]
+
+    mobius_masses = np.array([0, 1/3, 1/3, 1/3])
+
+    solution, runtime = choquet_graph_lp(n, np.array(traveling_time), mobius_masses)
+
+    print(solution)
 
 # -------- Main -------- #
 
@@ -386,9 +415,10 @@ if __name__ == "__main__":
     # question_1_2([i for i in range(3, 30)])
     # question_1_2(one_to_one=False)
     # question_1_3(plot_figures=True)
-    question_1_4()
+    # question_1_4()
 
     # question_2_2(10)
     # question_2_3()
     # plot_question_2_3()
 
+    # question_graph()
